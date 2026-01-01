@@ -1,0 +1,421 @@
+/* --- 1. Adım: Ana Sayfa Konteynerini Oluşturma --- */
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: hsl(0, 0%, 94%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  
+}
+/* --- 2. Adım: Kitap Alanını Ayarlama --- */
+.book-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin-top: 2%;
+    height: 80%;
+    bottom: 5%;
+    /* YENİ EKLENEN ORANLAR */
+    width:60%;  /* İçinde bulunduğu alanın genişliğinin %'ini kaplasın */
+    height: 60%; /* İçinde bulunduğu alanın yüksekliğinin %'ini kaplasın */
+     box-shadow: 40px 12px 25px 5px rgba(80, 79, 79, 0.2);
+      transform-style: preserve-3d; /* 3D animasyon için gerekli */
+    transition: transform 1.5s; /* Animasyon süresi */
+}
+
+/* --- 3. Adım: Sayfaların Oranını ve Boyutunu Garantileme --- */
+.portfolio-page {
+    background-color: #ffffff;
+    
+    /* SAYFANIN ORANINI KORU */
+    aspect-ratio: 210 / 297; /* A4 kağıt oranı. Bu en önemli kural! */
+    
+    /* SAYFANIN GENİŞLİĞİ: Esnek ol, konteynerin yarısını kapla */
+    width: 100%; /* Flexbox bu değeri kullanarak boyutları ayarlayacak */
+
+    /* SAYFANIN AŞIRI BÜYÜMESİNİ ENGELLE: Ekran yüksekliğini geçmesin */
+    max-height: 94vh; 
+    
+    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+/* --- GÖRSEL VE METİN POZİSYONLARI (Hiçbir değişiklik gerekmiyor, yüzdelik olduğu için çalışacak) --- */
+
+.layout-image {
+    position: absolute;
+    object-fit: cover;
+}
+.technical-drawing { top: 0%; bottom:4%; height: 90%; right:0;  z-index: 1; }
+.building-render { top: 0%; left: 4%; width: 75%; height: 45%;  z-index: 2; }
+.wireframe-model { bottom:10%; right: 20%; width: 25%; height: 30%;  z-index: 5; }
+.presentation-photo { bottom:10%; left: 4%; width: 50%; height: 40%; z-index: 4; }
+.title-block {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 300px;
+    height: 250px;
+    background-color: white;
+    padding: 10%;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    z-index: 8;
+     box-shadow: 20px 12px 25px 5px rgba(0, 0, 0, 0.2);
+}
+.title-block h1 {
+    margin: 0%;
+    font-size: clamp(60px, 3.5vw, 42px); /* Yazı boyutu da esnek */
+    color: #4b4b4b;
+    font-weight: 100;
+    bottom: 0px;
+}
+.title-block p {
+    margin: 0;
+    font-size: clamp(10px, 1vw, 12px); /* Yazı boyutu da esnek */
+    color: #333;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.right-page {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: #aaa;
+    padding: 20px;
+    text-align: center;
+}
+#book {
+  position: relative;
+}
+
+/* sağ alt hotspot */
+#book::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 140px;
+  height: 140px;
+  cursor: grab;
+}
+#book {
+  position: relative;
+}
+
+/* görünmez ama etkileşimli alan */
+#hotspot-next {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 140px;
+  height: 140px;
+
+  background: transparent; /* görünmez */
+  cursor: grab;             /* PAN */
+  z-index: 50;
+}
+
+#hotspot-next:active {
+  cursor: grabbing;
+}
+/* GENEL SIFIRLAMA VE SAHNE */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+
+/* HAREKET EDEN KATMAN */
+#movable-layer {
+    display: flex; /* Yan yana dizilim */
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 50px; /* Başlangıç pozisyonu */
+    bottom: 50px;
+    left: 50px;
+    right: 50px;
+    gap: 0; /* Sayfalar arası boşluk yok (Kitap gibi) */
+    transform-origin: center center;
+    transition: transform 0.1s linear; /* Yumuşaklık ayarı */
+    /* Kullanıcı seçim yapabilsin ama sürüklerken sorun çıkmasın */
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
+
+/* KİTAP KONTEYNIR GENEL YAPISI */
+.book-container {
+    width: 21cm; /* A4 Genişlik */
+    height: 29.7cm; /* A4 Yükseklik */
+    background-color: white;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    flex-shrink: 0; /* Küçülmeyi engelle */
+    overflow: hidden;
+}
+
+/* --- SOL SAYFA (BOŞ) TASARIMI --- */
+.left-page-placeholder {
+    background-color: #f8f8f8;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-right: 1px solid #ddd; /* Kitap ortası çizgisi */
+}
+
+.placeholder-text {
+    text-align: center;
+    color: #aaa;
+}
+
+/* --- SAĞ SAYFA (CV) TASARIMI --- */
+/* CV konteynırı içindeki flex yapısı */
+.cv-wrapper {
+    display: flex;
+}
+
+/* Sol Sütun (%35) */
+.left-column {
+    width: 35%;
+    background-color: #f2f0eb;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    height: 100%; /* Konteynırın tamamını kapla */
+}
+
+/* Sağ Sütun (%65) */
+.right-column {
+    width: 65%;
+    background-color: #fff;
+    padding: 40px 30px;
+    height: 100%;
+}
+
+/* CV İÇERİK STİLLERİ (Önceki kodlardan uyarlandı) */
+.profile-image-container {
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.profile-img {
+    width: 100%;
+    height: auto;
+    filter: grayscale(100%);
+    display: block;
+}
+
+.section-title-box {
+    background-color: #e6e1db;
+    padding: 5px;
+    margin: 10px 0;
+}
+
+.section-title-box h2 {
+    font-size: 1rem;
+    font-weight: 800;
+}
+
+.contact-item {
+    font-size: 0.8rem;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+}
+.contact-item i { margin-right: 8px; width: 15px;}
+
+.about-text p {
+    font-size: 0.8rem;
+    text-align: justify;
+    margin-bottom: 8px;
+    line-height: 1.3;
+}
+
+.main-header h1 { font-size: 2rem; margin-bottom: 5px; }
+.main-header h3 { font-size: 1.2rem; font-weight: 400; color: #555; margin-bottom: 20px;}
+
+.section-header {
+    background-color: #f2f0eb;
+    padding: 5px;
+    font-weight: bold;
+    font-size: 1rem;
+    margin: 20px 0 10px 0;
+}
+
+.content-block { font-size: 0.9rem; }
+.date { font-weight: bold; text-decoration: underline; }
+.job h4, .ref-item h4 { font-weight: bold; text-decoration: underline; }
+.mt-20 { margin-top: 15px; }
+
+ul.skills-list, ul.job-details { padding-left: 20px; margin-top: 5px;}
+ul li { margin-bottom: 3px; }
+
+/* --- GİZLİ PAN KONTROLCÜSÜ --- */
+#pan-controller {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    width: 100px; /* Sağ alttaki aktif alanın genişliği */
+    height: 100px; /* Sağ alttaki aktif alanın yüksekliği */
+    background-color: rgba(255, 0, 0, 0.0); /* Tamamen şeffaf (test için 0.2 yapabilirsin) */
+    z-index: 9999; /* En üstte durmalı */
+    cursor: move; /* Mouse üzerine gelince taşıma ikonu çıkar */
+}
+/* --- MAIL KOPYALAMA İŞLEMİ (GÜNCEL) --- */
+
+/* Mail Kapsayıcısı */
+.clickable-email {
+    cursor: pointer;          /* El işareti çıkar */
+    position: relative;       /* "Kopyalandı" yazısını buna hizalar */
+    display: inline-flex;     /* İçerikleri yan yana dizer */
+    align-items: center;      /* Dikey ortalama */
+    transition: color 0.3s;
+}
+
+.clickable-email:hover {
+    color: #555;              /* Üzerine gelince renk değişimi */
+}
+
+/* "Kopyalandı!" Baloncuğu */
+.copy-feedback {
+    /* BAŞLANGIÇTA GİZLEME AYARLARI */
+    opacity: 0;               /* Tamamen şeffaf */
+    visibility: hidden;       /* Görünmez */
+    
+    /* GÖRÜNÜM AYARLARI */
+    background-color: #333;   /* Koyu arka plan */
+    color: #fff;              /* Beyaz yazı */
+    font-size: 0.75rem;       /* Küçük yazı boyutu */
+    padding: 4px 8px;         /* İç boşluk */
+    border-radius: 4px;       /* Kenar yuvarlama */
+    
+    /* KONUM AYARLARI */
+    position: absolute;       /* Bağımsız konumlandırma */
+    left: 100%;               /* Mailin bittiği yerin sağına */
+    margin-left: 10px;        /* Biraz boşluk bırak */
+    white-space: nowrap;      /* Alt satıra geçmesin */
+    z-index: 100;             /* En üstte görünsün */
+    
+    /* EFEKT AYARI */
+    transition: opacity 0.3s ease, visibility 0.3s; 
+}
+
+/* JavaScript bu sınıfı eklediğinde görünür olacak */
+.copy-feedback.show {
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+/* --- MAIL KOPYALAMA İŞLEMİ (GÜNCEL) --- */
+
+/* Mail Kapsayıcısı */
+.clickable-email {
+    cursor: pointer;          /* El işareti çıkar */
+    position: relative;       /* "Kopyalandı" yazısını buna hizalar */
+    display: inline-flex;     /* İçerikleri yan yana dizer */
+    align-items: center;      /* Dikey ortalama */
+    transition: color 0.3s;
+}
+
+.clickable-email:hover {
+    color: #555;              /* Üzerine gelince renk değişimi */
+}
+
+/* "Kopyalandı!" Baloncuğu */
+.copy-feedback {
+    /* BAŞLANGIÇTA GİZLEME AYARLARI */
+    opacity: 0;               /* Tamamen şeffaf */
+    visibility: hidden;       /* Görünmez */
+    
+    /* GÖRÜNÜM AYARLARI */
+    background-color: #333;   /* Koyu arka plan */
+    color: #fff;              /* Beyaz yazı */
+    font-size: 0.75rem;       /* Küçük yazı boyutu */
+    padding: 4px 8px;         /* İç boşluk */
+    border-radius: 4px;       /* Kenar yuvarlama */
+    
+    /* KONUM AYARLARI */
+    position: absolute;       /* Bağımsız konumlandırma */
+    left: 100%;               /* Mailin bittiği yerin sağına */
+    margin-left: 10px;        /* Biraz boşluk bırak */
+    white-space: nowrap;      /* Alt satıra geçmesin */
+    z-index: 100;             /* En üstte görünsün */
+    
+    /* EFEKT AYARI */
+    transition: opacity 0.3s ease, visibility 0.3s; 
+}
+
+/* JavaScript bu sınıfı eklediğinde görünür olacak */
+.copy-feedback.show {
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden; /* scroll'u tamamen kapatır */
+}
+#movable-layer {
+    position: absolute;
+    inset: 5%; /* üst-alt-sağ-sol % boşluk */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2%;
+}
+.book-container {
+    height: 100%;
+    width: 48%;
+    background: #f6f6f6;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    border-radius: 6px;
+    overflow: hidden;
+}
+@media (max-width: 900px) {
+    #movable-layer {
+        flex-direction: column;
+        inset: 0%;
+    }
+
+    .book-container {
+        width: 100%;
+        height: 48%;
+    }
+}
+.left-column,
+.right-column {
+    height: 100%;
+    box-sizing: border-box;
+}
+.hotspot {
+    position: fixed;
+    width: 120px;
+    height: 120px;
+    opacity: 0;
+    z-index: 9999;
+    cursor: grab;
+}
+
+/* SAĞ ALT */
+.hotspot-next {
+    right: 0;
+    bottom: 0;
+}
+
+/* SOL ALT */
+.hotspot-prev {
+    left: 0;
+    bottom: 0;
+}
+
